@@ -5,22 +5,57 @@ using UnityEngine;
 public class Rays : MonoBehaviour {
     public GameObject Brimestone;
     List<GameObject> brimstones;
-    public KeyCode attack_key;
+    [Header("Control Settings")]
+    public KeyCode attackKey;
+    
+    [Header("Laser Settings")]
+    public Material material;
+    public Color lineColor;
+    public float lineSize;
+    List<GameObject> lines = new List<GameObject>();
+    LineRenderer myRenderer;
 	// Use this for initialization
 	void Start () {
 		brimstones = new List<GameObject>();
 	}
-	
-	// Update is called once per frame
-	void Update () {
+
+    public void PaintLine(Vector3 start, Vector3 end)
+    {
+        GameObject line = new GameObject();
+        lines.Add(line); // 统一管理动态生成的物体，以便销毁
+        line.transform.parent = transform;
+        myRenderer = line.AddComponent<LineRenderer>();
+
+        myRenderer.material = material;
+        myRenderer.startColor = lineColor;
+        myRenderer.endColor = lineColor;
+
+        myRenderer.startWidth = lineSize;
+        myRenderer.endWidth = lineSize;
+
+        myRenderer.positionCount = 2;
+        myRenderer.SetPosition(0, start);
+        myRenderer.SetPosition(1, end);
+        // renderer根据一个顶点构成的序列来绘制所需的线条，这里setPosition的第二个参数就代表要设置的顶点坐标，第一个参数代表这个顶点在序列中的索引位置，从0开始
+
+    }
+
+    // Update is called once per frame
+    void Update () {
         for (int i = 0; i < brimstones.Count; ++i) {
             Destroy(brimstones[i]);
         }
         brimstones.Clear();
+        for (int i = 0; i < lines.Count; ++i)
+        {
+            Destroy(lines[i]);
+        }
+        lines.Clear();
+
         Ray2D ray;
         Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
 
-        if (!Input.GetKey(attack_key)) return;
+        if (!Input.GetKey(attackKey)) return;
 
         //Vector2 rayVector = new Vector2(Input.mousePosition.x - transform.position.x, Input.mousePosition.y - transform.position.y);
         //Vector2 rayVector = new Vector2(mousePos.x - transform.position.x, mousePos.y - transform.position.y);
@@ -63,7 +98,14 @@ public class Rays : MonoBehaviour {
         DrawBrimstone(start, end);
     }
 
-    void DrawBrimstone(Vector2 start, Vector2 end) {
+    void DrawBrimstone(Vector2 start, Vector2 end)
+    {
+        Vector3 st = new Vector3(start.x, start.y, 0);
+        Vector3 ed = new Vector3(end.x, end.y, 0);
+        PaintLine(st, ed);
+    }
+
+    void DrawBrimstoneDeprecated(Vector2 start, Vector2 end) {
         //Debug.Log("brimstone called.");
         /*
         if (Input.GetKeyDown(KeyCode.Space)) {
